@@ -49,8 +49,19 @@ export default function CreatePage() {
 
     setBusy(true);
     try {
-      await createContent(fd);
+      if (typeof createContent !== 'function') {
+        throw new Error('createContent is not a function (import failed)');
+      }
+
+      // Useful diagnostics (will show in DevTools console)
+      const res = await createContent(fd);
+      console.log('insert result:', res);
       setMessage({ kind: 'success', text: 'Content published successfully!' });
+
+      // Refresh would normally happen in App(); we keep UX simple.
+
+
+
       setTitle('');
       setContent('');
       setTags('');
@@ -59,10 +70,14 @@ export default function CreatePage() {
       setAudioFile(null);
       setType('article');
     } catch (err) {
+      // Show full error details in DevTools (most useful for Supabase/RLS/storage issues)
+      // eslint-disable-next-line no-console
+      console.error('createContent error:', err);
       setMessage({ kind: 'error', text: String(err?.message || err) });
     } finally {
       setBusy(false);
     }
+
   }
 
   return (
